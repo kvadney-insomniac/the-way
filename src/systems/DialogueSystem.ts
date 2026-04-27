@@ -4,7 +4,7 @@ export interface DialogueLine {
   speaker: string;
   text: string;
   portrait?: string;
-  nameColor?: number;
+  nameColor?: number | string;  // accepts "0xc9a84c" strings from JSON or raw numbers
 }
 
 export interface DialogueConfig {
@@ -105,8 +105,9 @@ export class DialogueSystem {
     if (this.currentLine >= this.lines.length) { this.finish(); return; }
     const line = this.lines[this.currentLine];
     this.nameText.setText(line.speaker.toUpperCase());
+    const nc = typeof line.nameColor === 'string' ? parseInt(line.nameColor, 16) : line.nameColor;
     this.nameText.setColor(
-      line.nameColor ? Phaser.Display.Color.IntegerToColor(line.nameColor).rgba : '#f5deb3',
+      nc ? Phaser.Display.Color.IntegerToColor(nc).rgba : '#f5deb3',
     );
     this.bodyText.setText('');
     this.displayedChars = 0;

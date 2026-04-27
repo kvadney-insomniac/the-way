@@ -30,18 +30,18 @@ const COLORS: Record<EncounterAction, string> = {
   pass:   '#888888',
 };
 
-// Centered panel — screen-space coordinates
-const PANEL_W = 160;
-const PANEL_X = 4;
-const PANEL_Y = 14;  // just below the HUD bar
+const PANEL_X  = 4;
+const PANEL_Y  = 20;   // just below the 18px HUD bar
+const PANEL_W  = 200;  // wider so situation text fits
+const PAD      = 8;
+const OPT_H    = 14;   // px per option row
 
 export class EncounterSystem {
   private scene: Phaser.Scene;
-  private container!: Phaser.GameObjects.Container;
+  private bg!: Phaser.GameObjects.Graphics;
+  private situationText!: Phaser.GameObjects.Text;
   private optionTexts: Phaser.GameObjects.Text[] = [];
   private descText!: Phaser.GameObjects.Text;
-  private situationText!: Phaser.GameObjects.Text;
-  private bg!: Phaser.GameObjects.Graphics;
 
   private options: EncounterOption[] = [];
   private selectedIndex = 0;
@@ -49,53 +49,42 @@ export class EncounterSystem {
   private onChoice?: (action: EncounterAction, save: SaveData) => void;
   private save?: SaveData;
 
+  // track y-offset of option block so we can reposition on selection change
+  private optionsBaseY = 0;
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.createUI();
   }
 
   private createUI() {
-    // setScrollFactor(0) keeps the container screen-fixed
-    this.container = this.scene.add.container(0, 0)
-      .setDepth(110).setScrollFactor(0);
+    // Depth 210+ — above HUD bar (200) and location label (201)
+    this.bg = this.scene.add.graphics()
+      .setScrollFactor(0).setDepth(210).setVisible(false);
 
-    this.bg = this.scene.add.graphics();
-    this.container.add(this.bg);
+    this.situationText = this.scene.add.text(
+      PANEL_X + PAD, PANEL_Y + PAD, '',
+      {
+        fontFamily: 'Georgia, "Times New Roman", serif',
+        fontSize: '9px',
+        color: '#d4b896',
+        wordWrap: { width: PANEL_W - PAD * 2 },
+        lineSpacing: 3,
+        resolution: 3,
+      },
+    ).setScrollFactor(0).setDepth(211).setVisible(false);
 
-    this.situationText = this.scene.add.text(PANEL_X + 6, PANEL_Y + 6, '', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '11px',
-      color: '#d4b896',
-      wordWrap: { width: PANEL_W - 12 },
-      lineSpacing: 2,
-      resolution: 3,
-    });
-    this.container.add(this.situationText);
-
-    this.descText = this.scene.add.text(PANEL_X + 6, PANEL_Y + 80, '', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '10px',
-      fontStyle: 'italic',
-      color: '#aaaaaa',
-      wordWrap: { width: PANEL_W - 12 },
-      resolution: 3,
-    });
-    this.container.add(this.descText);
-
-    this.setVisible(false);
-  }
-
-  private drawBG(optionCount: number) {
-    const h = 38 + optionCount * 16 + 22;
-    this.bg.clear();
-    this.bg.fillStyle(0x000000, 0.55);
-    this.bg.fillRect(PANEL_X + 2, PANEL_Y + 2, PANEL_W, h);
-    this.bg.fillStyle(0x100c08, 0.96);
-    this.bg.fillRect(PANEL_X, PANEL_Y, PANEL_W, h);
-    this.bg.lineStyle(1, 0xc9a84c, 1);
-    this.bg.strokeRect(PANEL_X, PANEL_Y, PANEL_W, h);
-    this.bg.lineStyle(1, 0x7a5c2a, 0.4);
-    this.bg.strokeRect(PANEL_X + 2, PANEL_Y + 2, PANEL_W - 4, h - 4);
+    this.descText = this.scene.add.text(
+      PANEL_X + PAD, 0, '',
+      {
+        fontFamily: 'Georgia, "Times New Roman", serif',
+        fontSize: '9px',
+        fontStyle: 'italic',
+        color: '#7a6a5a',
+        wordWrap: { width: PANEL_W - PAD * 2 },
+        resolution: 3,
+      },
+    ).setScrollFactor(0).setDepth(211).setVisible(false);
   }
 
   start(config: EncounterConfig, save: SaveData) {
@@ -105,45 +94,80 @@ export class EncounterSystem {
     this.selectedIndex = 0;
     this.active = true;
 
-    this.drawBG(this.options.length);
     this.situationText.setText(config.situation);
-    this.updateOptionTexts();
-    this.setVisible(true);
+    this.situationText.setVisible(true);
+
+    // Measure rendered text height to flow options below it
+    const sitH = this.situationText.height;
+    this.optionsBaseY = PANEL_Y + PAD + sitH + PAD;
+
+    this.rebuildOptions();
+
+    // Total panel height: pad + situation + pad + options + pad + desc + pad
+    const descH  = 12;
+    const totalH = PAD + sitH + PAD + this.options.length * OPT_H + PAD + descH + PAD;
+    this.drawBG(totalH);
+
+    this.descText.setVisible(true);
+    this.bg.setVisible(true);
   }
 
-  private updateOptionTexts() {
+  private drawBG(h: number) {
+    this.bg.clear();
+    // Shadow
+    this.bg.fillStyle(0x000000, 0.5);
+    this.bg.fillRect(PANEL_X + 2, PANEL_Y + 2, PANEL_W, h);
+    // Body
+    this.bg.fillStyle(0x100c08, 0.97);
+    this.bg.fillRect(PANEL_X, PANEL_Y, PANEL_W, h);
+    // Gold border
+    this.bg.lineStyle(1, 0xc9a84c, 1);
+    this.bg.strokeRect(PANEL_X, PANEL_Y, PANEL_W, h);
+    // Inner border
+    this.bg.lineStyle(1, 0x7a5c2a, 0.4);
+    this.bg.strokeRect(PANEL_X + 2, PANEL_Y + 2, PANEL_W - 4, h - 4);
+    // Divider between situation and options
+    this.bg.lineStyle(1, 0x3a2a1a, 0.8);
+    this.bg.lineBetween(
+      PANEL_X + PAD, this.optionsBaseY - PAD / 2,
+      PANEL_X + PANEL_W - PAD, this.optionsBaseY - PAD / 2,
+    );
+  }
+
+  private rebuildOptions() {
     this.optionTexts.forEach(t => t.destroy());
     this.optionTexts = [];
 
     this.options.forEach((opt, i) => {
-      const sel = i === this.selectedIndex;
-      const prefix = sel ? '> ' : '  ';
-      const t = this.scene.add.text(PANEL_X + 8, PANEL_Y + 36 + i * 16, prefix + opt.label, {
-        fontFamily: '"Press Start 2P", monospace',
-        fontSize: '6px',
-        color: sel ? COLORS[opt.action] : '#555555',
-        resolution: 3,
-      });
-      this.container.add(t);
+      const sel    = i === this.selectedIndex;
+      const prefix = sel ? '▶ ' : '  ';
+      const t = this.scene.add.text(
+        PANEL_X + PAD,
+        this.optionsBaseY + i * OPT_H,
+        prefix + opt.label,
+        {
+          fontFamily: '"Press Start 2P", monospace',
+          fontSize: '6px',
+          color: sel ? COLORS[opt.action] : '#4a4030',
+          resolution: 3,
+        },
+      ).setScrollFactor(0).setDepth(211);
       this.optionTexts.push(t);
     });
 
-    this.descText.setY(PANEL_Y + 36 + this.options.length * 16 + 6);
+    const descY = this.optionsBaseY + this.options.length * OPT_H + PAD;
+    this.descText.setY(descY);
     this.descText.setText(this.options[this.selectedIndex]?.description ?? '');
-  }
-
-  private setVisible(v: boolean) {
-    this.container.setVisible(v);
   }
 
   handleInput(justDown: { up: boolean; down: boolean; space: boolean; enter: boolean }) {
     if (!this.active) return;
     if (justDown.up) {
       this.selectedIndex = (this.selectedIndex - 1 + this.options.length) % this.options.length;
-      this.updateOptionTexts();
+      this.rebuildOptions();
     } else if (justDown.down) {
       this.selectedIndex = (this.selectedIndex + 1) % this.options.length;
-      this.updateOptionTexts();
+      this.rebuildOptions();
     } else if (justDown.space || justDown.enter) {
       this.confirm();
     }
@@ -153,8 +177,16 @@ export class EncounterSystem {
     const chosen = this.options[this.selectedIndex];
     if (!chosen || !this.save) return;
     this.active = false;
-    this.setVisible(false);
+    this.hide();
     this.onChoice?.(chosen.action, this.save);
+  }
+
+  private hide() {
+    this.bg.setVisible(false);
+    this.situationText.setVisible(false);
+    this.descText.setVisible(false);
+    this.optionTexts.forEach(t => t.destroy());
+    this.optionTexts = [];
   }
 
   get isActive() { return this.active; }

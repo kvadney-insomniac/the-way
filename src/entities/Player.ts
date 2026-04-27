@@ -52,6 +52,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     this.setVelocity(vx, vy);
+    // Y-based depth: sprites lower on screen render in front
+    this.setDepth(this.y);
 
     if (vx !== 0 || vy !== 0) {
       this.playAnim(`walk_${this.facing}`);

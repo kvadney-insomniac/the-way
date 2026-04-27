@@ -22,7 +22,7 @@ export class NPC extends Phaser.Physics.Arcade.Sprite {
 
     this.npcName = config.name;
     this.interactRadius = config.interactRadius ?? 24;
-    this.setDepth(5);
+    this.setDepth(config.y); // Y-based depth so lower sprites render in front
     if (config.tint) this.setTint(config.tint);
 
     this.indicator = scene.add.text(config.x, config.y - 12, '!', {

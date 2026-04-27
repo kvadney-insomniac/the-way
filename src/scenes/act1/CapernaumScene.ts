@@ -46,6 +46,15 @@ export class CapernaumScene extends Phaser.Scene {
       this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
       this.spaceKey    = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
       this.cursorKeys  = this.input.keyboard!.createCursorKeys();
+      // Prevent browser from scrolling / selecting text on arrow/space keys
+      this.input.keyboard!.addCapture([
+        Phaser.Input.Keyboard.KeyCodes.UP,
+        Phaser.Input.Keyboard.KeyCodes.DOWN,
+        Phaser.Input.Keyboard.KeyCodes.LEFT,
+        Phaser.Input.Keyboard.KeyCodes.RIGHT,
+        Phaser.Input.Keyboard.KeyCodes.SPACE,
+        Phaser.Input.Keyboard.KeyCodes.Z,
+      ]);
 
       this.cameras.main.setBounds(0, 0, MAP_W, MAP_H);
       this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
@@ -100,14 +109,14 @@ export class CapernaumScene extends Phaser.Scene {
     }
 
     // Houses (left side)
-    this.drawHouse(g, 20, 50, 0x9a7050);
-    this.drawHouse(g, 20, 100, 0x8a6040);
-    this.drawHouse(g, 70, 60, 0xaa8060);
+    this.drawHouse(g, 20,  50,  0xc4a46a);
+    this.drawHouse(g, 20,  100, 0xb89458);
+    this.drawHouse(g, 70,  60,  0xd4b47a);
 
     // Houses (right side)
-    this.drawHouse(g, 200, 50, 0x9a7050);
-    this.drawHouse(g, 260, 40, 0x8a6040);
-    this.drawHouse(g, 220, 100, 0xb09070);
+    this.drawHouse(g, 200, 50,  0xc8a86e);
+    this.drawHouse(g, 260, 40,  0xba9860);
+    this.drawHouse(g, 220, 100, 0xcc9c62);
 
     // Well
     this.drawWell(g, 180, 90);
@@ -131,21 +140,40 @@ export class CapernaumScene extends Phaser.Scene {
     g.fillEllipse(196, 95, 8, 6);
     g.fillEllipse(208, 97, 6, 5);
 
-    // Collision walls (invisible static bodies)
-    this.addWall(MAP_W / 2, 160, MAP_W, 6);   // water edge — full width
-    // House walls (match drawHouse positions: x, y, w=32, h=24)
-    this.addWall(36, 62,  32, 24);   // left house 1
-    this.addWall(36, 112, 32, 24);   // left house 2
-    this.addWall(86, 72,  32, 24);   // left house 3
-    this.addWall(216, 62, 32, 24);   // right house 1
-    this.addWall(276, 52, 32, 24);   // right house 2
-    this.addWall(236, 112, 32, 24);  // right house 3
+    // Collision walls — x,y = top-left corner (matching drawHouse/fillRect coords)
+    this.addWall(0,   158, MAP_W, 6);  // water edge full width
+    this.addWall(20,  50,  32, 24);    // left house 1
+    this.addWall(20,  100, 32, 24);    // left house 2
+    this.addWall(70,  60,  32, 24);    // left house 3
+    this.addWall(200, 50,  32, 24);    // right house 1
+    this.addWall(260, 40,  32, 24);    // right house 2
+    this.addWall(220, 100, 32, 24);    // right house 3
+    this.walls.refresh();
   }
 
-  private addWall(cx: number, cy: number, w: number, h: number) {
-    const zone = this.add.zone(cx, cy, w, h);
-    this.physics.add.existing(zone, true);
-    this.walls.add(zone);
+  private addWall(x: number, y: number, w: number, h: number) {
+    // Use Rectangle (not Zone) — has reliable width/height for physics bodies
+    const r = this.add.rectangle(x + w / 2, y + h / 2, w, h, 0x000000, 0);
+    this.physics.add.existing(r, true);
+    (r.body as Phaser.Physics.Arcade.StaticBody).setSize(w, h);
+    this.walls.add(r);
+  }
+
+  /** Place a Kenney tiny-town tile house at world position (x, y).
+   *  Layout: 2×1 roof row at y, 2×1 wall row at y+16.
+   *  Covers the 32×24 collision footprint set by addWall().
+   */
+  private placeTileHouse(x: number, y: number) {
+    const WALL_FRAME  = 26; // brown brick wall  (row 2, col 2)
+    const ROOF_FRAME  = 38; // roof tile          (row 3, col 2)
+
+    // Roof row — sits at the top of the house
+    this.add.image(x,      y, 'kenney-town', ROOF_FRAME).setOrigin(0, 0);
+    this.add.image(x + 16, y, 'kenney-town', ROOF_FRAME).setOrigin(0, 0);
+
+    // Wall row — base of the house
+    this.add.image(x,      y + 16, 'kenney-town', WALL_FRAME).setOrigin(0, 0);
+    this.add.image(x + 16, y + 16, 'kenney-town', WALL_FRAME).setOrigin(0, 0);
   }
 
   private drawHouse(g: Phaser.GameObjects.Graphics, x: number, y: number, wallColor: number) {
@@ -202,47 +230,67 @@ export class CapernaumScene extends Phaser.Scene {
   }
 
   private createPlayer() {
-    this.player = new Player(this, 160, 130);
+    // Start in the village path, north of the dock — player walks south toward Andrew
+    this.player = new Player(this, 160, 95);
   }
 
   private createNPCs() {
-    // Andrew — on the dock, mending nets
-    const andrew = new NPC(this, { key: 'andrew', name: 'Andrew', x: 80, y: 158 });
-    // Random villager NPCs for atmosphere
-    const villager1 = new NPC(this, { key: 'andrew', name: 'Villager', x: 40, y: 80 });
-    const villager2 = new NPC(this, { key: 'peter', name: 'Fisherman', x: 240, y: 155 });
-    const villager3 = new NPC(this, { key: 'peter', name: 'Child', x: 195, y: 70, interactRadius: 18 });
-    const nicodemus = new NPC(this, { key: 'nicodemus', name: 'Nicodemus', x: 270, y: 60 });
+    // Andrew — on the dock, slightly left of center so player can walk up behind him
+    const andrew = new NPC(this, { key: 'andrew', name: 'Andrew', x: 148, y: 154 });
+    // Atmosphere NPCs
+    const villager1 = new NPC(this, { key: 'andrew',    name: 'Villager',  x: 40,  y: 85 });
+    const villager2 = new NPC(this, { key: 'peter',     name: 'Fisherman', x: 240, y: 150 });
+    const villager3 = new NPC(this, { key: 'peter',     name: 'Child',     x: 195, y: 72, interactRadius: 18 });
+    const nicodemus = new NPC(this, { key: 'nicodemus', name: 'Nicodemus', x: 270, y: 62 });
 
     this.npcs = [andrew, villager1, villager2, villager3, nicodemus];
   }
 
   private drawHUD() {
     const save = loadSave();
-    const hudG = this.add.graphics().setScrollFactor(0).setDepth(200);
+    const BAR_H = 18;
+    const D = 201;
+    const g = this.add.graphics().setScrollFactor(0).setDepth(200);
 
-    // Top bar background
-    hudG.fillStyle(0x0a0806, 0.8);
-    hudG.fillRect(0, 0, 320, 12);
+    // Bar background + border
+    g.fillStyle(0x080604, 0.92);
+    g.fillRect(0, 0, 320, BAR_H);
+    g.lineStyle(1, 0xc9a84c, 0.5);
+    g.lineBetween(0, BAR_H, 320, BAR_H);
 
-    this.add.text(4, 2, `♥ DAY ${save.faithLevel}`, {
+    // Left section — Faith level as filled/empty pip dots
+    const faithLevel = Math.min(save.faithLevel, 5);
+    this.add.text(5, 4, 'FAITH', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '5px', color: '#c9a84c', resolution: 3,
-    }).setScrollFactor(0).setDepth(201);
+      fontSize: '6px', color: '#c9a84c', resolution: 3,
+    }).setScrollFactor(0).setDepth(D);
+    // Draw 5 small pips as graphics — more reliable than unicode hearts
+    for (let i = 0; i < 5; i++) {
+      const filled = i < faithLevel;
+      g.fillStyle(filled ? 0xe05050 : 0x3a2020);
+      g.fillRect(45 + i * 9, 5, 7, 7);
+      if (filled) {
+        g.lineStyle(1, 0xff8080, 0.6);
+        g.strokeRect(45 + i * 9, 5, 7, 7);
+      }
+    }
 
-    this.add.text(100, 2, `LOVE ${save.love}`, {
+    // Center — LOVE counter
+    const loveColor = save.love >= 10 ? '#f5c842' : save.love >= 5 ? '#88cc88' : '#c9a84c';
+    this.add.text(160, 4, `LOVE  ${save.love}`, {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '5px', color: '#88cc88', resolution: 3,
-    }).setScrollFactor(0).setDepth(201);
+      fontSize: '7px', color: loveColor, resolution: 3,
+    }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(D);
 
-    this.add.text(240, 2, '[Z] TALK', {
+    // Right — control hint
+    this.add.text(315, 4, 'Z: TALK', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '4px', color: '#6a5030', resolution: 3,
-    }).setScrollFactor(0).setDepth(201);
+      fontSize: '6px', color: '#5a4530', resolution: 3,
+    }).setOrigin(1, 0).setScrollFactor(0).setDepth(D);
   }
 
   private drawLocationLabel() {
-    const label = this.add.text(160, 20, 'CAPERNAUM', {
+    const label = this.add.text(160, 25, 'CAPERNAUM', {
       fontFamily: '"Press Start 2P", monospace',
       fontSize: '7px', color: '#f5deb3', resolution: 3,
     }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
@@ -257,22 +305,34 @@ export class CapernaumScene extends Phaser.Scene {
   }
 
   private playAmbientIntro() {
-    // Ambient dialogue bubble from a passerby after a short delay
     this.time.delayedCall(1500, () => {
-      const bubble = this.add.text(35, 65, '"Have you heard\nabout the teacher?"', {
-        fontFamily: '"Press Start 2P", monospace',
-        fontSize: '3px', color: '#aaaaaa',
-        backgroundColor: '#1a120a',
-        padding: { x: 3, y: 2 },
-        resolution: 3,
-      }).setScrollFactor(1).setDepth(50);
+      // Screen-space whisper bubble — centered near top of play area
+      const bg = this.add.graphics().setScrollFactor(0).setDepth(49);
+      const txt = this.add.text(160, 42,
+        '"Have you heard about the teacher from Nazareth?"',
+        {
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: '9px',
+          color: '#e8d8b0',
+          align: 'center',
+          wordWrap: { width: 240 },
+          resolution: 3,
+        },
+      ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
+
+      // Draw backdrop behind the text
+      const b = txt.getBounds();
+      bg.fillStyle(0x1a120a, 0.88);
+      bg.fillRect(b.left - 6, b.top - 4, b.width + 12, b.height + 8);
+      bg.lineStyle(1, 0xc9a84c, 0.6);
+      bg.strokeRect(b.left - 6, b.top - 4, b.width + 12, b.height + 8);
 
       this.tweens.add({
-        targets: bubble,
+        targets: [bg, txt],
         alpha: 0,
-        delay: 3000,
-        duration: 600,
-        onComplete: () => bubble.destroy(),
+        delay: 3500,
+        duration: 700,
+        onComplete: () => { bg.destroy(); txt.destroy(); },
       });
     });
   }
@@ -331,7 +391,7 @@ export class CapernaumScene extends Phaser.Scene {
       if (!this.andrewMet) {
         this.andrewMet = true;
         this.dialogue.start({
-          lines: act1Data.andrew_encounter.greeting,
+          lines: act1Data.andrew_intro,
           onComplete: () => this.triggerAndrewEncounter(npc),
         });
       } else if (this.andrewEncounterDone) {
@@ -381,10 +441,10 @@ export class CapernaumScene extends Phaser.Scene {
 
         let lines: Array<{speaker: string; text: string}>;
         switch (action) {
-          case 'listen': lines = act1Data.andrew_encounter.after_listen; break;
-          case 'serve':  lines = act1Data.andrew_encounter.after_serve;  break;
-          case 'pray':   lines = act1Data.andrew_encounter.after_pray;   break;
-          default:       lines = act1Data.andrew_encounter.after_pass;   break;
+          case 'listen': lines = act1Data.andrew_listen; break;
+          case 'serve':  lines = act1Data.andrew_serve;  break;
+          case 'pray':   lines = act1Data.andrew_pray;   break;
+          default:       lines = [{ speaker: 'Andrew', text: 'The teacher passed through here. Maybe you will see him yet.' }]; break;
         }
 
         this.dialogue.start({

@@ -73,6 +73,75 @@
       "reference": "John 3:1, John 7:50, John 19:39"
     }
   },
+  "scroll_call_of_disciples": {
+    "title": "The Call — Leaving Everything",
+    "otRoot": {
+      "heading": "The OT Root: Elijah's Cloak on Elisha",
+      "text": "When Elijah found Elisha plowing with twelve yoke of oxen (1 Kings 19:19–21), he threw his cloak over him without a word. Elisha ran, asked only to say goodbye, then slaughtered his oxen and burned the plow — an irreversible act. There was no going back. The same urgency echoes centuries later on the shore of Galilee: a cloak thrown, nets abandoned, a life surrendered on the spot.",
+      "reference": "1 Kings 19:19-21"
+    },
+    "wordStudy": {
+      "heading": "Greek: ἀκολουθέω (akoloutheo) — 'To Follow'",
+      "text": "Akoloutheo carries the sense of walking the same road as another — conforming your steps to theirs. It is the word of apprenticeship, of loyalty, of choosing one direction over all others. In the Synoptic Gospels it is nearly always used of following Jesus specifically, never casually. To 'follow' in this sense is not to trail behind — it is to reorient the whole self.",
+      "word": "ἀκολουθέω"
+    },
+    "narrativeArc": {
+      "heading": "The Grand Story: Rupture, Not Recruitment",
+      "text": "The calling of Andrew, Peter, James, and John is not a recruitment — it is a rupture. Jesus does not explain his credentials, outline a mission statement, or offer incentives. He speaks and walks. What compels a man to drop his livelihood, leave his father in the boat, and go? The text does not say. The silence is the point: something in the call itself carries authority that argument never could.",
+      "reference": "Matthew 4:18-22, Mark 1:16-20"
+    },
+    "newCreation": {
+      "heading": "New Creation Echo: From Nets to Nations",
+      "text": "Fishermen hauling nets from the Sea of Galilee prefigures the final scene of Revelation — every tongue and tribe gathered before the throne. The same hands that once sorted fish by species will one day be part of a harvest that spans the world. Small beginnings, cosmic ends.",
+      "reference": "Matthew 4:19, Revelation 7:9"
+    }
+  },
+  "scroll_water_to_wine": {
+    "title": "The First Sign — Water into Wine",
+    "otRoot": {
+      "heading": "The OT Root: Elisha and the Bitter Water",
+      "text": "In 2 Kings 2:19–22, Elisha throws salt into a polluted spring and declares the water healed — useless water made pure by prophetic word. The pattern is older still: Moses struck the rock and water flowed; Ezekiel saw a river from the Temple turning the Dead Sea fresh. Jesus at Cana stands in this line, but surpasses it. He does not heal what is broken — he transforms the ordinary into abundance.",
+      "reference": "2 Kings 2:19-22, Ezekiel 47:8-9"
+    },
+    "wordStudy": {
+      "heading": "Hebrew: יַיִן / מַיִם (Yayin / Mayim) — Wine and Water",
+      "text": "The Hebrew words for wine (yayin) and water (mayim) are near-homophones — a sonic echo buried in the language itself, as if the tongue always half-expected the transformation. Water is the substance of creation's first day; wine is the symbol of covenant joy, of the messianic banquet Isaiah promises. Jesus turning one into the other is not a party trick — it is a declaration.",
+      "word": "יַיִן / מַיִם"
+    },
+    "narrativeArc": {
+      "heading": "The Grand Story: From Void to Abundance",
+      "text": "In Genesis, the deep waters were formless and empty — the raw material of a creation not yet spoken into order. At Cana, six stone water jars stand empty. Jesus fills them, then exceeds all expectation: 120 gallons of the finest wine. The same movement runs from Genesis to Revelation — God taking what is empty, formless, or bitter and making it overflow with life.",
+      "reference": "Genesis 1:2, John 2:1-11, Revelation 19:7-9"
+    },
+    "newCreation": {
+      "heading": "New Creation Echo: The Wedding Banquet",
+      "text": "The wedding at Cana is a preview of the Marriage Supper of the Lamb. Isaiah 25:6 promises God will prepare 'a feast of rich food for all peoples, a banquet of aged wine.' Jesus does not wait until the end of history to begin the party — he starts it in Galilee, at a village wedding, with six ordinary stone jars.",
+      "reference": "Isaiah 25:6, Revelation 19:9"
+    }
+  },
+  "scroll_authority": {
+    "title": "With Authority — Not Like the Scribes",
+    "otRoot": {
+      "heading": "The OT Root: Moses and the Scribes",
+      "text": "Moses spoke to Israel as the one who had been in God's presence — not quoting predecessors but declaring what he had received directly (Deuteronomy 5:4). The scribes, by contrast, derived their authority from the chain of tradition: 'Rabbi Shammai says... Rabbi Hillel says...' Jesus cuts through all of it. He says 'I say to you' — not 'it is written' as citation, but as the one who wrote it.",
+      "reference": "Deuteronomy 5:4, Matthew 7:28-29"
+    },
+    "wordStudy": {
+      "heading": "Greek: ἐξουσία (exousia) — Authority",
+      "text": "Exousia means authority that comes from one's own being — not delegated power but inherent right. The scribes had authority on loan, derived from tradition. Jesus has exousia as one who possesses it himself. When the unclean spirit obeys, it is not following a ritual formula — it is responding to a Person who has authority over it by nature.",
+      "word": "ἐξουσία"
+    },
+    "narrativeArc": {
+      "heading": "The Grand Story: The Word Who Speaks",
+      "text": "At Creation, God's word had authority because it was creative speech — 'Let there be light,' and there was. John opens his Gospel: 'In the beginning was the Word.' Jesus in the synagogue is not a man with impressive doctrine. He is the Word made flesh, speaking into chaos as he did at the dawn of time. The unclean spirit recognizes what the crowds only sense: something fundamental has entered the room.",
+      "reference": "Genesis 1:3, John 1:1-3, Mark 1:21-28"
+    },
+    "newCreation": {
+      "heading": "New Creation Echo: Chaos Brought to Order",
+      "text": "The possessed man in the synagogue mirrors the formless void — chaos inhabiting what should be a house of order and worship. Jesus speaks, and chaos yields. This is the pattern of all new creation: not just healing the individual, but restoring the whole space to the purpose for which it was made.",
+      "reference": "Mark 1:26-27, Revelation 21:4-5"
+    }
+  },
   "woman_at_well": {
     "title": "Living Water — The Samaritan Woman",
     "otRoot": {

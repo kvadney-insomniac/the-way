@@ -12,15 +12,22 @@ export class BootScene extends Phaser.Scene {
 
   preload() {
     this.createLoadingScreen();
-    // Future: load real sprite sheets, tilemaps, audio here
-    // this.load.spritesheet('player', 'assets/sprites/player.png', { frameWidth: 16, frameHeight: 16 });
-    // this.load.audio('capernaum', ['assets/audio/capernaum.ogg', 'assets/audio/capernaum.mp3']);
+    // Kenney CC0 asset packs (downloaded to public/assets/sprites/)
+    // tilemap_packed.png = zero gap between tiles (192 = 12×16 exactly)
+    this.load.spritesheet('kenney-town', 'assets/sprites/tiny-town/Tilemap/tilemap_packed.png', {
+      frameWidth: 16, frameHeight: 16,
+    });
+    // roguelikeChar has 1px spacing between tiles (918 = 54×16 + 54×1)
+    this.load.spritesheet('kenney-chars', 'assets/sprites/roguelike-chars/Spritesheet/roguelikeChar_transparent.png', {
+      frameWidth: 16, frameHeight: 16, spacing: 1,
+    });
   }
 
   create() {
     this.generateSprites();
     this.createAnimations();
-    this.scene.start('TitleScene');
+    const devScene = new URLSearchParams(window.location.search).get('scene');
+    this.scene.start(devScene ?? 'TitleScene');
   }
 
   private createLoadingScreen() {
@@ -45,14 +52,33 @@ export class BootScene extends Phaser.Scene {
   private generateSprites() {
     // Player sprite (16x16, 4 directions × 3 frames = 12 frames)
     this.generatePlayerTexture();
-    // NPC textures
-    this.generateNPCTexture('andrew', 0x8b6914);
-    this.generateNPCTexture('peter',  0x5c3a1e);
-    this.generateNPCTexture('jesus',  0xd4af7a);
-    this.generateNPCTexture('woman',  0x9b6b9b);
-    this.generateNPCTexture('nicodemus', 0x2d4a1e);
-    // Tileset
+    // Crop named NPC textures from the kenney-chars spritesheet
+    // Sheet: 54 cols × 12 rows, 16px tiles, 1px spacing → frame = row*54 + col
+    this.cropNPCTexture('andrew',    0);    // col 0 row 0 — brown-robed villager
+    this.cropNPCTexture('peter',     54);   // col 0 row 1 — stocky fisherman
+    this.cropNPCTexture('jesus',     108);  // col 0 row 2 — robed figure (will tint gold)
+    this.cropNPCTexture('woman',     162);  // col 0 row 3 — female figure
+    this.cropNPCTexture('nicodemus', 216);  // col 0 row 4 — elder/scholar
+    // Tileset (kept for fallback)
     this.generateTileset();
+  }
+
+  private cropNPCTexture(key: string, frameIndex: number) {
+    // Copy a single frame from kenney-chars into a new 16×16 texture
+    const src = this.textures.get('kenney-chars');
+    if (!src || src.key === '__MISSING') {
+      // Fallback if kenney-chars failed to load
+      this.generateNPCTexture(key, 0x8b6914);
+      return;
+    }
+    const frame = src.get(frameIndex) as Phaser.Textures.Frame;
+    if (!frame) { this.generateNPCTexture(key, 0x8b6914); return; }
+
+    // Render the frame onto a new 16×16 texture using drawFrame
+    const rt = this.add.renderTexture(0, 0, 16, 16);
+    rt.drawFrame('kenney-chars', frameIndex, 0, 0);
+    rt.saveTexture(key);
+    rt.destroy();
   }
 
   private generatePlayerTexture() {
