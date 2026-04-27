@@ -1,0 +1,141 @@
+{
+  "andrew_encounter": {
+    "situation": "A fisherman is mending nets on the dock. He looks up at you — eyes bright with something restless.",
+    "greeting": [
+      { "speaker": "Andrew", "text": "Hey. You're new around here, aren't you?" },
+      { "speaker": "Andrew", "text": "I can always tell. Everyone from Capernaum has that... tired look." },
+      { "speaker": "You", "text": "..." },
+      { "speaker": "Andrew", "text": "I used to look like that too. Before I met him." }
+    ],
+    "after_listen": [
+      { "speaker": "Andrew", "text": "His name is Jesus. From Nazareth. John the Baptist pointed him out on the Jordan..." },
+      { "speaker": "Andrew", "text": "He called us 'the Lamb of God.' I didn't understand what that meant. Not then." },
+      { "speaker": "Andrew", "text": "So I followed him. Asked him where he was staying. He just said..." },
+      { "speaker": "Andrew", "text": "'Come and see.'" },
+      { "speaker": "Andrew", "text": "And we did. We stayed with him all day. Everything changed." },
+      { "speaker": "Andrew", "text": "I found my brother Simon right after. I said, 'We've found the Messiah.' Simon laughed at me. He didn't laugh for long." }
+    ],
+    "after_serve": [
+      { "speaker": "Andrew", "text": "You're helping? I... thank you. My hands are giving out." },
+      { "speaker": "Andrew", "text": "You know, he asked us to leave all of this behind. The nets. The boat." },
+      { "speaker": "Andrew", "text": "My brother Simon thought I'd lost my mind." },
+      { "speaker": "Andrew", "text": "Maybe I had. Or maybe I'd finally found it." }
+    ],
+    "after_pray": [
+      { "speaker": "Andrew", "text": "...You're praying? Right here?" },
+      { "speaker": "Andrew", "text": "Jesus does that too. Sometimes he slips away before any of us wake up. Gone to a quiet place." },
+      { "speaker": "Andrew", "text": "I used to think prayer was for the Pharisees. Loud words. Public prayers." },
+      { "speaker": "Andrew", "text": "He says the Father sees in secret." }
+    ],
+    "after_pass": [
+      { "speaker": "Andrew", "text": "..." },
+      { "speaker": "Andrew", "text": "It's alright. Everyone passes by at first." }
+    ]
+  },
+  "call_of_peter": {
+    "situation": "Simon Peter is hauling an empty net into the boat. The lines on his face tell the whole story: another night. Nothing.",
+    "greeting": [
+      { "speaker": "Simon Peter", "text": "Don't. Whatever you're about to say, just... don't." },
+      { "speaker": "Simon Peter", "text": "I've been out there all night. Nothing. The lake gives nothing today." },
+      { "speaker": "Simon Peter", "text": "My brother says to come hear this teacher. 'Rabbi,' he calls him. As if I have TIME for rabbis." }
+    ],
+    "jesus_approaches": [
+      { "speaker": "Jesus", "text": "Simon." },
+      { "speaker": "Simon Peter", "text": "Rabbi. I— yes." },
+      { "speaker": "Jesus", "text": "Put out into the deep water. Let down your nets for a catch." },
+      { "speaker": "Simon Peter", "text": "Master... we worked hard all night and caught nothing." },
+      { "speaker": "Simon Peter", "text": "But... because you say so, I will let down the nets." }
+    ],
+    "the_catch": [
+      { "speaker": "narrator", "text": "The nets fill. Both boats, full to sinking. Peter falls to his knees." },
+      { "speaker": "Simon Peter", "text": "Go away from me, Lord. I am a sinful man." },
+      { "speaker": "Jesus", "text": "Don't be afraid, Simon." },
+      { "speaker": "Jesus", "text": "From now on you will fish for people." }
+    ],
+    "scripture": {
+      "reference": "Luke 5:10-11",
+      "text": "Then Jesus said to Simon, 'Don't be afraid; from now on you will fish for people.' So they pulled their boats up on shore, left everything and followed him."
+    }
+  },
+  "nicodemus": {
+    "situation": "It is past midnight. An oil lamp flickers on the rooftop. Nicodemus, a member of the Sanhedrin, speaks in a low voice.",
+    "greeting": [
+      { "speaker": "Nicodemus", "text": "I came at night. You understand." },
+      { "speaker": "Nicodemus", "text": "My colleagues on the council... they would not understand." },
+      { "speaker": "Nicodemus", "text": "But I have seen what you do. No one could do these signs unless God were with him." }
+    ],
+    "born_again": [
+      { "speaker": "Jesus", "text": "Very truly I tell you, no one can see the kingdom of God unless they are born again." },
+      { "speaker": "Nicodemus", "text": "How can someone be born when they are old? Surely they cannot enter a second time..." },
+      { "speaker": "Jesus", "text": "Very truly I tell you, no one can enter the kingdom of God unless they are born of water and the Spirit." },
+      { "speaker": "Jesus", "text": "The wind blows wherever it pleases. You hear its sound, but you cannot tell where it comes from or where it is going." },
+      { "speaker": "Jesus", "text": "So it is with everyone born of the Spirit." },
+      { "speaker": "Nicodemus", "text": "How can this be?" }
+    ],
+    "john_3_16": [
+      { "speaker": "Jesus", "text": "For God so loved the world that he gave his one and only Son..." },
+      { "speaker": "Jesus", "text": "...that whoever believes in him shall not perish but have eternal life." },
+      { "speaker": "Jesus", "text": "For God did not send his Son into the world to condemn the world, but to save the world through him." }
+    ],
+    "scripture": {
+      "reference": "John 3:16-17",
+      "text": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life. For God did not send his Son into the world to condemn the world, but to save the world through him."
+    }
+  },
+  "woman_at_well": {
+    "situation": "Noon. The hottest part of the day. A woman comes to Jacob's Well alone — when no one else would be here.",
+    "greeting": [
+      { "speaker": "Jesus", "text": "Will you give me a drink?" },
+      { "speaker": "Woman", "text": "You are a Jew and I am a Samaritan woman. How can you ask me for a drink?" },
+      { "speaker": "Jesus", "text": "If you knew the gift of God and who it is that asks you for a drink, you would have asked him and he would have given you living water." },
+      { "speaker": "Woman", "text": "Sir, you have nothing to draw with and the well is deep. Where can you get this living water?" }
+    ],
+    "living_water": [
+      { "speaker": "Jesus", "text": "Everyone who drinks this water will be thirsty again..." },
+      { "speaker": "Jesus", "text": "...but whoever drinks the water I give them will never thirst." },
+      { "speaker": "Jesus", "text": "Indeed, the water I give them will become in them a spring of water welling up to eternal life." },
+      { "speaker": "Woman", "text": "Sir, give me this water so that I won't get thirsty and have to keep coming here to draw water." }
+    ],
+    "you_are_seen": [
+      { "speaker": "Jesus", "text": "Go, call your husband and come back." },
+      { "speaker": "Woman", "text": "I have no husband." },
+      { "speaker": "Jesus", "text": "You are right when you say you have no husband." },
+      { "speaker": "Jesus", "text": "The fact is, you have had five husbands, and the man you now have is not your husband." },
+      { "speaker": "Woman", "text": "...Sir, I can see that you are a prophet." }
+    ],
+    "true_worship": [
+      { "speaker": "Jesus", "text": "Yet a time is coming and has now come when the true worshipers will worship the Father in the Spirit and in truth." },
+      { "speaker": "Jesus", "text": "For they are the kind of worshipers the Father seeks." },
+      { "speaker": "Woman", "text": "I know that Messiah is coming. When he comes, he will explain everything to us." },
+      { "speaker": "Jesus", "text": "I, the one speaking to you — I am he." },
+      { "speaker": "narrator", "text": "She left her water jar. She went back to the town." },
+      { "speaker": "Woman", "text": "Come, see a man who told me everything I ever did." }
+    ],
+    "scripture": {
+      "reference": "John 4:13-14",
+      "text": "Jesus answered, 'Everyone who drinks this water will be thirsty again, but whoever drinks the water I give them will never thirst. Indeed, the water I give them will become in them a spring of water welling up to eternal life.'"
+    }
+  },
+  "sermon_beatitudes": {
+    "situation": "The hillside above the Sea of Galilee. Thousands have gathered. He sits down — which is how teachers teach. He opens his mouth.",
+    "beatitudes": [
+      { "speaker": "Jesus", "text": "Blessed are the poor in spirit, for theirs is the kingdom of heaven." },
+      { "speaker": "Jesus", "text": "Blessed are those who mourn, for they will be comforted." },
+      { "speaker": "Jesus", "text": "Blessed are the meek, for they will inherit the earth." },
+      { "speaker": "Jesus", "text": "Blessed are those who hunger and thirst for righteousness, for they will be filled." },
+      { "speaker": "Jesus", "text": "Blessed are the merciful, for they will be shown mercy." },
+      { "speaker": "Jesus", "text": "Blessed are the pure in heart, for they will see God." },
+      { "speaker": "Jesus", "text": "Blessed are the peacemakers, for they will be called children of God." },
+      { "speaker": "Jesus", "text": "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven." }
+    ],
+    "salt_light": [
+      { "speaker": "Jesus", "text": "You are the salt of the earth. But if the salt loses its saltiness, how can it be made salty again?" },
+      { "speaker": "Jesus", "text": "You are the light of the world. A town built on a hill cannot be hidden." },
+      { "speaker": "Jesus", "text": "Let your light shine before others, that they may see your good deeds and glorify your Father in heaven." }
+    ],
+    "scripture": {
+      "reference": "Matthew 5:3-10",
+      "text": "Blessed are the poor in spirit, for theirs is the kingdom of heaven..."
+    }
+  }
+}
