@@ -19,4 +19,9 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [BootScene, TitleScene, CapernaumScene, ScrollRoomScene],
 };
 
-new Phaser.Game(config);
+const game = new Phaser.Game(config);
+
+// Expose for dev-console debugging
+if (import.meta.env.DEV) {
+  (window as unknown as Record<string, unknown>).__game__ = game;
+}

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { loadSave } from '../systems/SaveSystem';
 import { fadeIn, fadeToScene } from '../utils/pixelTransition';
+import { globalAudio } from '../systems/AudioSystem';
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -13,6 +14,7 @@ export class TitleScene extends Phaser.Scene {
     this.drawTitle();
     this.drawMenu();
     this.drawVerse();
+    globalAudio.play('title', 2000);
   }
 
   private drawBackground() {
@@ -65,34 +67,42 @@ export class TitleScene extends Phaser.Scene {
     const { width } = this.scale;
 
     // Drop shadow
-    this.add.text(width / 2 + 1, 32, 'THE WAY', {
+    this.add.text(width / 2 + 1, 28, 'THE WAY', {
       fontFamily: '"Press Start 2P", monospace',
       fontSize: '14px',
-      color: '#3a2510',
+      color: '#1a0e05',
       resolution: 4,
-    }).setOrigin(0.5).setAlpha(0.6);
+    }).setOrigin(0.5).setAlpha(0.8);
 
     // Main title
-    this.add.text(width / 2, 31, 'THE WAY', {
+    this.add.text(width / 2, 27, 'THE WAY', {
       fontFamily: '"Press Start 2P", monospace',
       fontSize: '14px',
       color: '#c9a84c',
       resolution: 4,
     }).setOrigin(0.5);
 
-    // Subtitle
-    this.add.text(width / 2, 50, '"I am the way, the truth, and the life."', {
-      fontFamily: '"Press Start 2P", monospace',
-      fontSize: '4px',
-      color: '#a08040',
-      resolution: 4,
+    // Gold divider
+    const div = this.add.graphics();
+    div.lineStyle(1, 0xc9a84c, 0.4);
+    div.lineBetween(width / 2 - 60, 42, width / 2 + 60, 42);
+
+    // Subtitle — Crimson Text, large enough to read
+    this.add.text(width / 2, 54, '"I am the way, the truth,\nand the life."', {
+      fontFamily: '"Crimson Text", Georgia, serif',
+      fontSize: '11px',
+      color: '#f0dba0',
+      align: 'center',
+      lineSpacing: 2,
+      resolution: 2,
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, 58, '— John 14:6', {
-      fontFamily: '"Press Start 2P", monospace',
-      fontSize: '4px',
-      color: '#6a5030',
-      resolution: 4,
+    this.add.text(width / 2, 74, '— John 14:6', {
+      fontFamily: '"Crimson Text", Georgia, serif',
+      fontSize: '9px',
+      fontStyle: 'italic',
+      color: '#c9a84c',
+      resolution: 2,
     }).setOrigin(0.5);
   }
 
@@ -129,8 +139,8 @@ export class TitleScene extends Phaser.Scene {
     // Blink "press space" prompt
     const pressSpace = this.add.text(width / 2, 140, 'PRESS SPACE TO BEGIN', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '4px',
-      color: '#6a5a40',
+      fontSize: '5px',
+      color: '#c9a84c',
       resolution: 4,
     }).setOrigin(0.5);
 

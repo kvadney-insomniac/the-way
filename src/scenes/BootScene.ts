@@ -56,50 +56,44 @@ export class BootScene extends Phaser.Scene {
   }
 
   private generatePlayerTexture() {
-    const g = this.make.graphics({ x: 0, y: 0 } as object);
     const fw = 16, fh = 16;
-    // 4 directions × 3 frames
+    const totalW = fw * 12;
+    // Use add.graphics so it renders correctly in WebGL context
+    const g = this.add.graphics();
     const dirs = ['down', 'left', 'right', 'up'];
     dirs.forEach((_, di) => {
       for (let frame = 0; frame < 3; frame++) {
         const fx = (di * 3 + frame) * fw;
         const fy = 0;
-        // Body
         g.fillStyle(0xc4955a); g.fillRect(fx + 4, fy + 6, 8, 7);
-        // Head
         g.fillStyle(0xd4b896); g.fillRect(fx + 4, fy + 1, 8, 6);
-        // Eyes (direction-specific)
         g.fillStyle(0x3a2010);
         if (di === 0) { g.fillRect(fx + 5, fy + 3, 2, 1); g.fillRect(fx + 9, fy + 3, 2, 1); }
-        if (di === 3) { /* looking up — no eyes */ }
-        if (di === 1) { g.fillRect(fx + 4, fy + 3, 2, 1); } // left
-        if (di === 2) { g.fillRect(fx + 10, fy + 3, 2, 1); } // right
-        // Legs (walk cycle)
+        if (di === 1) { g.fillRect(fx + 4, fy + 3, 2, 1); }
+        if (di === 2) { g.fillRect(fx + 10, fy + 3, 2, 1); }
         g.fillStyle(0x6b4c2a);
         if (frame === 0) {
-          g.fillRect(fx + 5, fy + 13, 3, 3);
-          g.fillRect(fx + 8, fy + 13, 3, 3);
+          g.fillRect(fx + 5, fy + 13, 3, 3); g.fillRect(fx + 8, fy + 13, 3, 3);
         } else if (frame === 1) {
-          g.fillRect(fx + 4, fy + 12, 3, 4);
-          g.fillRect(fx + 9, fy + 14, 3, 2);
+          g.fillRect(fx + 4, fy + 12, 3, 4); g.fillRect(fx + 9, fy + 14, 3, 2);
         } else {
-          g.fillRect(fx + 4, fy + 14, 3, 2);
-          g.fillRect(fx + 9, fy + 12, 3, 4);
+          g.fillRect(fx + 4, fy + 14, 3, 2); g.fillRect(fx + 9, fy + 12, 3, 4);
         }
       }
     });
-    g.generateTexture('player', fw * 12, fh);
+    g.generateTexture('player', totalW, fh);
     g.destroy();
+    // Split the generated atlas into per-frame crops
+    this.splitAtlas('player', fw, fh, 12);
   }
 
   private generateNPCTexture(key: string, bodyColor: number) {
-    const g = this.make.graphics({ x: 0, y: 0 } as object);
+    const g = this.add.graphics();
     g.fillStyle(bodyColor);      g.fillRect(4, 6, 8, 7);
     g.fillStyle(0xd4b896);       g.fillRect(4, 1, 8, 6);
     g.fillStyle(0x3a2010);       g.fillRect(5, 3, 2, 1); g.fillRect(9, 3, 2, 1);
     g.fillStyle(bodyColor - 0x222222 < 0 ? 0 : bodyColor - 0x222222);
     g.fillRect(5, 13, 3, 3); g.fillRect(8, 13, 3, 3);
-    // If Jesus, add glow outline
     if (key === 'jesus') {
       g.lineStyle(1, 0xfff4cc, 0.7);
       g.strokeRect(3, 0, 10, 16);
@@ -108,8 +102,18 @@ export class BootScene extends Phaser.Scene {
     g.destroy();
   }
 
+  /** Register numbered frames on an atlas texture so animations can reference them */
+  private splitAtlas(key: string, fw: number, fh: number, count: number) {
+    const tex = this.textures.get(key);
+    // Remove the auto-created full-width frame 0 and replace with correct crops
+    tex.remove('0');
+    for (let i = 0; i < count; i++) {
+      tex.add(i, 0, i * fw, 0, fw, fh);
+    }
+  }
+
   private generateTileset() {
-    const g = this.make.graphics({ x: 0, y: 0 } as object);
+    const g = this.add.graphics();
     const ts = 16;
 
     // Tile 0: sand/ground

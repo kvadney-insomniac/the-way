@@ -5,7 +5,8 @@ import { DialogueSystem } from '../../systems/DialogueSystem';
 import { EncounterSystem, EncounterAction } from '../../systems/EncounterSystem';
 import { applyEncounterChoice } from '../../systems/LOVESystem';
 import { loadSave, writeSave, unlockEpisode, completeEpisode } from '../../systems/SaveSystem';
-import { fadeIn, fadeToScene } from '../../utils/pixelTransition';
+import { fadeIn } from '../../utils/pixelTransition';
+import { globalAudio } from '../../systems/AudioSystem';
 import act1Data from '../../data/dialogue/act1.json';
 
 const MAP_W = 320;
@@ -31,27 +32,37 @@ export class CapernaumScene extends Phaser.Scene {
   }
 
   create() {
-    fadeIn(this, 800);
-    this.buildMap();
-    this.createPlayer();
-    this.createNPCs();
+    try {
+      this.buildMap();
+      this.createPlayer();
+      this.createNPCs();
 
-    this.dialogue  = new DialogueSystem(this);
-    this.encounter = new EncounterSystem(this);
+      this.dialogue  = new DialogueSystem(this);
+      this.encounter = new EncounterSystem(this);
 
-    this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-    this.spaceKey    = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.cursorKeys  = this.input.keyboard!.createCursorKeys();
+      this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+      this.spaceKey    = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+      this.cursorKeys  = this.input.keyboard!.createCursorKeys();
 
-    this.cameras.main.setBounds(0, 0, MAP_W, MAP_H);
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-    this.cameras.main.setZoom(1);
+      this.cameras.main.setBounds(0, 0, MAP_W, MAP_H);
+      this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
-    this.physics.world.setBounds(0, 0, MAP_W, MAP_H);
+      this.physics.world.setBounds(0, 0, MAP_W, MAP_H);
 
-    this.drawHUD();
-    this.drawLocationLabel();
-    this.playAmbientIntro();
+      this.drawHUD();
+      this.drawLocationLabel();
+      this.playAmbientIntro();
+      fadeIn(this, 600);
+      globalAudio.play('capernaum', 1500);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message + '\n' + (err.stack ?? '') : String(err);
+      this.add.text(160, 90, 'SCENE ERROR:\n' + msg, {
+        fontFamily: 'monospace', fontSize: '5px', color: '#ff4444',
+        wordWrap: { width: 300 }, resolution: 2,
+        backgroundColor: '#000000',
+      }).setDepth(999).setOrigin(0.5).setScrollFactor(0);
+      console.error('CapernaumScene.create error:', err);
+    }
   }
 
   private buildMap() {
@@ -117,13 +128,9 @@ export class CapernaumScene extends Phaser.Scene {
     g.fillEllipse(196, 95, 8, 6);
     g.fillEllipse(208, 97, 6, 5);
 
-    // Physics collision walls (invisible)
-    const walls = this.physics.add.staticGroup();
-    // Water boundary
-    const waterWall = walls.create(MAP_W / 2, 164, undefined) as Phaser.Physics.Arcade.Sprite;
-    waterWall.setVisible(false).refreshBody();
-    (waterWall.body as Phaser.Physics.Arcade.StaticBody).setSize(MAP_W, 4);
-    waterWall.setY(164);
+    // Water boundary — simple invisible rectangle body
+    const waterZone = this.add.zone(MAP_W / 2, 164, MAP_W, 4);
+    this.physics.add.existing(waterZone, true);
 
     // World bounds already set in create()
   }
@@ -195,10 +202,6 @@ export class CapernaumScene extends Phaser.Scene {
     const nicodemus = new NPC(this, { key: 'nicodemus', name: 'Nicodemus', x: 270, y: 60 });
 
     this.npcs = [andrew, villager1, villager2, villager3, nicodemus];
-
-    // Villager ambient dialogue
-    villager1.setInteractive(false as unknown as object);
-    villager3.setInteractive(false as unknown as object);
   }
 
   private drawHUD() {
