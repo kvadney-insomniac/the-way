@@ -29,7 +29,7 @@ export class NPC extends Phaser.Physics.Arcade.Sprite {
       fontFamily: '"Press Start 2P", monospace',
       fontSize: '6px',
       color: '#c9a84c',
-      resolution: 4,
+      resolution: 3,
     }).setOrigin(0.5).setDepth(15).setVisible(false);
   }
 

@@ -16,6 +16,7 @@ const TILE = 16;
 export class CapernaumScene extends Phaser.Scene {
   private player!: Player;
   private npcs: NPC[] = [];
+  private walls!: Phaser.Physics.Arcade.StaticGroup;
   private dialogue!: DialogueSystem;
   private encounter!: EncounterSystem;
   private interactKey!: Phaser.Input.Keyboard.Key;
@@ -33,9 +34,11 @@ export class CapernaumScene extends Phaser.Scene {
 
   create() {
     try {
+      this.walls = this.physics.add.staticGroup();
       this.buildMap();
       this.createPlayer();
       this.createNPCs();
+      this.physics.add.collider(this.player, this.walls);
 
       this.dialogue  = new DialogueSystem(this);
       this.encounter = new EncounterSystem(this);
@@ -58,7 +61,7 @@ export class CapernaumScene extends Phaser.Scene {
       const msg = err instanceof Error ? err.message + '\n' + (err.stack ?? '') : String(err);
       this.add.text(160, 90, 'SCENE ERROR:\n' + msg, {
         fontFamily: 'monospace', fontSize: '5px', color: '#ff4444',
-        wordWrap: { width: 300 }, resolution: 2,
+        wordWrap: { width: 300 }, resolution: 3,
         backgroundColor: '#000000',
       }).setDepth(999).setOrigin(0.5).setScrollFactor(0);
       console.error('CapernaumScene.create error:', err);
@@ -128,11 +131,21 @@ export class CapernaumScene extends Phaser.Scene {
     g.fillEllipse(196, 95, 8, 6);
     g.fillEllipse(208, 97, 6, 5);
 
-    // Water boundary — simple invisible rectangle body
-    const waterZone = this.add.zone(MAP_W / 2, 164, MAP_W, 4);
-    this.physics.add.existing(waterZone, true);
+    // Collision walls (invisible static bodies)
+    this.addWall(MAP_W / 2, 160, MAP_W, 6);   // water edge — full width
+    // House walls (match drawHouse positions: x, y, w=32, h=24)
+    this.addWall(36, 62,  32, 24);   // left house 1
+    this.addWall(36, 112, 32, 24);   // left house 2
+    this.addWall(86, 72,  32, 24);   // left house 3
+    this.addWall(216, 62, 32, 24);   // right house 1
+    this.addWall(276, 52, 32, 24);   // right house 2
+    this.addWall(236, 112, 32, 24);  // right house 3
+  }
 
-    // World bounds already set in create()
+  private addWall(cx: number, cy: number, w: number, h: number) {
+    const zone = this.add.zone(cx, cy, w, h);
+    this.physics.add.existing(zone, true);
+    this.walls.add(zone);
   }
 
   private drawHouse(g: Phaser.GameObjects.Graphics, x: number, y: number, wallColor: number) {
@@ -214,24 +227,24 @@ export class CapernaumScene extends Phaser.Scene {
 
     this.add.text(4, 2, `♥ DAY ${save.faithLevel}`, {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '5px', color: '#c9a84c', resolution: 4,
+      fontSize: '5px', color: '#c9a84c', resolution: 3,
     }).setScrollFactor(0).setDepth(201);
 
     this.add.text(100, 2, `LOVE ${save.love}`, {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '5px', color: '#88cc88', resolution: 4,
+      fontSize: '5px', color: '#88cc88', resolution: 3,
     }).setScrollFactor(0).setDepth(201);
 
     this.add.text(240, 2, '[Z] TALK', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '4px', color: '#6a5030', resolution: 4,
+      fontSize: '4px', color: '#6a5030', resolution: 3,
     }).setScrollFactor(0).setDepth(201);
   }
 
   private drawLocationLabel() {
     const label = this.add.text(160, 20, 'CAPERNAUM', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '7px', color: '#f5deb3', resolution: 4,
+      fontSize: '7px', color: '#f5deb3', resolution: 3,
     }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
 
     this.tweens.add({
@@ -251,7 +264,7 @@ export class CapernaumScene extends Phaser.Scene {
         fontSize: '3px', color: '#aaaaaa',
         backgroundColor: '#1a120a',
         padding: { x: 3, y: 2 },
-        resolution: 4,
+        resolution: 3,
       }).setScrollFactor(1).setDepth(50);
 
       this.tweens.add({
@@ -394,7 +407,7 @@ export class CapernaumScene extends Phaser.Scene {
     if (xp <= 0) return;
     const popup = this.add.text(this.player.x, this.player.y - 20, `+${xp} XP`, {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '5px', color: '#c9a84c', resolution: 4,
+      fontSize: '5px', color: '#c9a84c', resolution: 3,
     }).setDepth(300);
 
     this.tweens.add({

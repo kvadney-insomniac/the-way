@@ -4,7 +4,6 @@ export interface DialogueLine {
   speaker: string;
   text: string;
   portrait?: string;
-  /** Optional color tint for the speaker name */
   nameColor?: number;
 }
 
@@ -13,12 +12,13 @@ export interface DialogueConfig {
   onComplete?: () => void;
 }
 
+// Screen-space constants (relative to the 320×180 viewport)
 const BOX_X = 4;
-const BOX_Y = 110;
+const BOX_Y = 104;
 const BOX_W = 312;
-const BOX_H = 66;
-const PADDING = 8;
-const CHARS_PER_FRAME = 2;
+const BOX_H = 74;
+const PAD = 7;
+const CHARS_PER_TICK = 2;
 
 export class DialogueSystem {
   private scene: Phaser.Scene;
@@ -40,47 +40,44 @@ export class DialogueSystem {
   }
 
   private createUI() {
-    this.box = this.scene.add.graphics();
-    this.box.setDepth(100);
+    // All elements use setScrollFactor(0) — screen-fixed, not world-positioned
+    this.box = this.scene.add.graphics()
+      .setDepth(100).setScrollFactor(0);
 
-    this.nameText = this.scene.add.text(BOX_X + PADDING, BOX_Y + PADDING, '', {
+    this.nameText = this.scene.add.text(BOX_X + PAD, BOX_Y + PAD, '', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '6px',
+      fontSize: '7px',
       color: '#f5deb3',
-      resolution: 4,
-    }).setDepth(101);
+      resolution: 3,
+    }).setDepth(101).setScrollFactor(0);
 
-    this.bodyText = this.scene.add.text(BOX_X + PADDING, BOX_Y + PADDING + 14, '', {
-      fontFamily: '"Press Start 2P", monospace',
-      fontSize: '5px',
+    this.bodyText = this.scene.add.text(BOX_X + PAD, BOX_Y + PAD + 14, '', {
+      fontFamily: 'Georgia, "Times New Roman", serif',
+      fontSize: '10px',
       color: '#fffde8',
-      wordWrap: { width: BOX_W - PADDING * 2 },
-      lineSpacing: 4,
-      resolution: 4,
-    }).setDepth(101);
+      wordWrap: { width: BOX_W - PAD * 2 },
+      lineSpacing: 2,
+      resolution: 3,
+    }).setDepth(101).setScrollFactor(0);
 
     this.continueArrow = this.scene.add.text(
-      BOX_X + BOX_W - PADDING - 6,
-      BOX_Y + BOX_H - PADDING - 6,
+      BOX_X + BOX_W - PAD - 8,
+      BOX_Y + BOX_H - PAD - 8,
       '▼',
-      { fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#c9a84c', resolution: 4 }
-    ).setDepth(101).setVisible(false);
+      { fontFamily: '"Press Start 2P", monospace', fontSize: '6px', color: '#c9a84c', resolution: 3 },
+    ).setDepth(101).setScrollFactor(0).setVisible(false);
 
     this.setVisible(false);
   }
 
   private drawBox() {
     this.box.clear();
-    // Shadow
     this.box.fillStyle(0x000000, 0.6);
     this.box.fillRect(BOX_X + 2, BOX_Y + 2, BOX_W, BOX_H);
-    // Background
-    this.box.fillStyle(0x1a120a, 0.92);
+    this.box.fillStyle(0x1a120a, 0.94);
     this.box.fillRect(BOX_X, BOX_Y, BOX_W, BOX_H);
-    // Gold border
     this.box.lineStyle(1, 0xc9a84c, 1);
     this.box.strokeRect(BOX_X, BOX_Y, BOX_W, BOX_H);
-    // Inner border
     this.box.lineStyle(1, 0x7a5c2a, 0.5);
     this.box.strokeRect(BOX_X + 2, BOX_Y + 2, BOX_W - 4, BOX_H - 4);
   }
@@ -89,7 +86,7 @@ export class DialogueSystem {
     this.box.setVisible(v);
     this.nameText.setVisible(v);
     this.bodyText.setVisible(v);
-    this.continueArrow.setVisible(false);
+    if (!v) this.continueArrow.setVisible(false);
   }
 
   start(config: DialogueConfig) {
@@ -105,14 +102,11 @@ export class DialogueSystem {
   }
 
   private showLine() {
-    if (this.currentLine >= this.lines.length) {
-      this.finish();
-      return;
-    }
+    if (this.currentLine >= this.lines.length) { this.finish(); return; }
     const line = this.lines[this.currentLine];
     this.nameText.setText(line.speaker.toUpperCase());
     this.nameText.setColor(
-      line.nameColor ? Phaser.Display.Color.IntegerToColor(line.nameColor).rgba : '#f5deb3'
+      line.nameColor ? Phaser.Display.Color.IntegerToColor(line.nameColor).rgba : '#f5deb3',
     );
     this.bodyText.setText('');
     this.displayedChars = 0;
@@ -123,9 +117,7 @@ export class DialogueSystem {
     if (!this.active) return;
     const line = this.lines[this.currentLine];
     if (!line) return;
-
     if (this.displayedChars < line.text.length) {
-      // Skip typewriter — show full text
       this.displayedChars = line.text.length;
       this.bodyText.setText(line.text);
       this.continueArrow.setVisible(true);
@@ -133,7 +125,6 @@ export class DialogueSystem {
       this.currentLine++;
       this.displayedChars = 0;
       this.charTimer = 0;
-      this.continueArrow.setVisible(false);
       this.showLine();
     }
   }
@@ -142,20 +133,17 @@ export class DialogueSystem {
     if (!this.active) return;
     const line = this.lines[this.currentLine];
     if (!line) return;
-
     if (this.displayedChars < line.text.length) {
       this.charTimer += delta;
-      const charsToAdd = Math.floor(this.charTimer / (1000 / 60)) * CHARS_PER_FRAME;
-      if (charsToAdd > 0) {
+      const add = Math.floor(this.charTimer / (1000 / 60)) * CHARS_PER_TICK;
+      if (add > 0) {
         this.charTimer = 0;
-        this.displayedChars = Math.min(line.text.length, this.displayedChars + charsToAdd);
+        this.displayedChars = Math.min(line.text.length, this.displayedChars + add);
         this.bodyText.setText(line.text.slice(0, this.displayedChars));
       }
     } else {
       this.continueArrow.setVisible(true);
-      // Pulse the arrow
-      const pulse = Math.sin(this.scene.time.now * 0.005) * 0.3 + 0.7;
-      this.continueArrow.setAlpha(pulse);
+      this.continueArrow.setAlpha(Math.sin(this.scene.time.now * 0.005) * 0.3 + 0.7);
     }
   }
 

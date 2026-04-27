@@ -13,14 +13,13 @@ export class TitleScene extends Phaser.Scene {
     this.drawBackground();
     this.drawTitle();
     this.drawMenu();
-    this.drawVerse();
+    this.drawSaveInfo();
     globalAudio.play('title', 2000);
   }
 
   private drawBackground() {
     const { width, height } = this.scale;
 
-    // Night sky gradient (pixel-style horizontal bands)
     const colors = [0x0d0a07, 0x110e0a, 0x16120d, 0x1a1610, 0x2a1f12, 0x3d2b18];
     colors.forEach((c, i) => {
       const g = this.add.graphics();
@@ -29,37 +28,33 @@ export class TitleScene extends Phaser.Scene {
       g.fillRect(0, i * bandH, width, bandH + 1);
     });
 
-    // Stars
     const starGraphics = this.add.graphics();
     for (let i = 0; i < 40; i++) {
       const x = Phaser.Math.Between(0, width);
       const y = Phaser.Math.Between(0, height * 0.6);
-      const brightness = Phaser.Math.FloatBetween(0.3, 1.0);
-      starGraphics.fillStyle(0xfff8e8, brightness);
+      starGraphics.fillStyle(0xfff8e8, Phaser.Math.FloatBetween(0.3, 1.0));
       starGraphics.fillRect(x, y, 1, 1);
     }
 
-    // Horizon glow (pre-dawn)
     const horizonGlow = this.add.graphics();
     horizonGlow.fillGradientStyle(0x3d2b18, 0x3d2b18, 0xc47a2a, 0xc47a2a, 0.0, 0.0, 0.3, 0.3);
     horizonGlow.fillRect(0, height * 0.55, width, height * 0.45);
 
-    // Silhouette: hills and a lone olive tree
     const silhouette = this.add.graphics();
     silhouette.fillStyle(0x0a0704);
-    // Left hill
     silhouette.fillTriangle(0, height, 80, height * 0.72, 160, height);
-    // Right hill
     silhouette.fillTriangle(160, height, 280, height * 0.68, 320, height);
-    // Olive tree silhouette (right side)
     silhouette.fillRect(260, Math.floor(height * 0.72), 2, 20);
     silhouette.fillEllipse(261, Math.floor(height * 0.72), 14, 10);
 
-    // Distant city lights (Jerusalem)
     const cityG = this.add.graphics();
     for (let i = 0; i < 12; i++) {
       cityG.fillStyle(0xf5c842, Phaser.Math.FloatBetween(0.3, 0.7));
-      cityG.fillRect(Phaser.Math.Between(20, 160), Phaser.Math.Between(Math.floor(height * 0.73), Math.floor(height * 0.77)), 1, 1);
+      cityG.fillRect(
+        Phaser.Math.Between(20, 160),
+        Phaser.Math.Between(Math.floor(height * 0.73), Math.floor(height * 0.77)),
+        1, 1,
+      );
     }
   }
 
@@ -67,42 +62,42 @@ export class TitleScene extends Phaser.Scene {
     const { width } = this.scale;
 
     // Drop shadow
-    this.add.text(width / 2 + 1, 28, 'THE WAY', {
+    this.add.text(width / 2 + 1, 23, 'THE WAY', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#1a0e05',
-      resolution: 4,
-    }).setOrigin(0.5).setAlpha(0.8);
+      resolution: 3,
+    }).setOrigin(0.5).setAlpha(0.7);
 
     // Main title
-    this.add.text(width / 2, 27, 'THE WAY', {
+    this.add.text(width / 2, 22, 'THE WAY', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#c9a84c',
-      resolution: 4,
+      resolution: 3,
     }).setOrigin(0.5);
 
-    // Gold divider
+    // Divider
     const div = this.add.graphics();
-    div.lineStyle(1, 0xc9a84c, 0.4);
-    div.lineBetween(width / 2 - 60, 42, width / 2 + 60, 42);
+    div.lineStyle(1, 0xc9a84c, 0.5);
+    div.lineBetween(width / 2 - 70, 38, width / 2 + 70, 38);
 
-    // Subtitle — Crimson Text, large enough to read
-    this.add.text(width / 2, 54, '"I am the way, the truth,\nand the life."', {
-      fontFamily: '"Crimson Text", Georgia, serif',
-      fontSize: '11px',
+    // Scripture — use a readable serif size
+    this.add.text(width / 2, 52, '"I am the way,\nthe truth, and the life."', {
+      fontFamily: 'Georgia, "Times New Roman", serif',
+      fontSize: '13px',
       color: '#f0dba0',
       align: 'center',
-      lineSpacing: 2,
-      resolution: 2,
+      lineSpacing: 4,
+      resolution: 3,
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, 74, '— John 14:6', {
-      fontFamily: '"Crimson Text", Georgia, serif',
-      fontSize: '9px',
+    this.add.text(width / 2, 73, '— John 14:6', {
+      fontFamily: 'Georgia, "Times New Roman", serif',
       fontStyle: 'italic',
+      fontSize: '11px',
       color: '#c9a84c',
-      resolution: 2,
+      resolution: 3,
     }).setOrigin(0.5);
   }
 
@@ -112,19 +107,19 @@ export class TitleScene extends Phaser.Scene {
     const isNewGame = save.faithLevel === 1 && save.totalXP === 0;
 
     const menuItems = isNewGame
-      ? [{ label: '▶  BEGIN YOUR JOURNEY', key: 'new' }]
+      ? [{ label: '> BEGIN YOUR JOURNEY', key: 'new' }]
       : [
-          { label: '▶  CONTINUE', key: 'continue' },
-          { label: '   BEGIN AGAIN', key: 'new' },
+          { label: '> CONTINUE', key: 'continue' },
+          { label: '  BEGIN AGAIN', key: 'new' },
         ];
 
     menuItems.forEach((item, i) => {
-      const y = 90 + i * 16;
+      const y = 90 + i * 18;
       const t = this.add.text(width / 2, y, item.label, {
         fontFamily: '"Press Start 2P", monospace',
-        fontSize: '6px',
+        fontSize: '7px',
         color: i === 0 ? '#f5deb3' : '#6a5a4a',
-        resolution: 4,
+        resolution: 3,
       }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
       t.on('pointerover', () => t.setColor('#c9a84c'));
@@ -132,20 +127,18 @@ export class TitleScene extends Phaser.Scene {
       t.on('pointerdown', () => this.startGame());
     });
 
-    // SPACE to start
     this.input.keyboard!.on('keydown-SPACE', () => this.startGame());
     this.input.keyboard!.on('keydown-ENTER', () => this.startGame());
 
-    // Blink "press space" prompt
-    const pressSpace = this.add.text(width / 2, 140, 'PRESS SPACE TO BEGIN', {
+    const prompt = this.add.text(width / 2, 153, 'PRESS SPACE TO BEGIN', {
       fontFamily: '"Press Start 2P", monospace',
-      fontSize: '5px',
+      fontSize: '6px',
       color: '#c9a84c',
-      resolution: 4,
+      resolution: 3,
     }).setOrigin(0.5);
 
     this.tweens.add({
-      targets: pressSpace,
+      targets: prompt,
       alpha: 0,
       duration: 700,
       yoyo: true,
@@ -154,20 +147,25 @@ export class TitleScene extends Phaser.Scene {
     });
   }
 
-  private drawVerse() {
-    // Day/LOVE display if returning player
+  private drawSaveInfo() {
     const save = loadSave();
-    if (save.totalXP > 0) {
-      this.add.text(4, 4, `DAY ${save.faithLevel}  LOVE ${save.love}`, {
-        fontFamily: '"Press Start 2P", monospace',
-        fontSize: '4px',
-        color: '#6a5030',
-        resolution: 4,
-      });
-    }
+    if (save.totalXP === 0) return;
+    this.add.text(6, 4, `DAY ${save.faithLevel}`, {
+      fontFamily: '"Press Start 2P", monospace',
+      fontSize: '6px',
+      color: '#c9a84c',
+      resolution: 3,
+    });
+    this.add.text(6, 14, `LOVE ${save.love}`, {
+      fontFamily: '"Press Start 2P", monospace',
+      fontSize: '6px',
+      color: '#88cc88',
+      resolution: 3,
+    });
   }
 
   private startGame() {
+    globalAudio.stop(400);
     fadeToScene(this, 'CapernaumScene');
   }
 }

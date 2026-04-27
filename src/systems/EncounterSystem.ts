@@ -17,22 +17,23 @@ export interface EncounterConfig {
 }
 
 const DEFAULT_OPTIONS: EncounterOption[] = [
-  { action: 'listen', label: 'LISTEN', description: 'Hear their story' },
-  { action: 'serve',  label: 'SERVE',  description: 'Act on their need' },
-  { action: 'pray',   label: 'PRAY',   description: 'Intercede for them' },
+  { action: 'listen', label: 'LISTEN',  description: 'Hear their story' },
+  { action: 'serve',  label: 'SERVE',   description: 'Act on their need' },
+  { action: 'pray',   label: 'PRAY',    description: 'Intercede for them' },
   { action: 'pass',   label: 'PASS BY', description: 'Continue on your way' },
 ];
 
-const COLORS: Record<EncounterAction, number> = {
-  listen:  0x4a9eff,
-  serve:   0x5ecb6b,
-  pray:    0xf5deb3,
-  pass:    0x888888,
+const COLORS: Record<EncounterAction, string> = {
+  listen: '#4a9eff',
+  serve:  '#5ecb6b',
+  pray:   '#f5deb3',
+  pass:   '#888888',
 };
 
-const BOX_X = 4;
-const BOX_Y = 4;
-const BOX_W = 140;
+// Centered panel — screen-space coordinates
+const PANEL_W = 160;
+const PANEL_X = 4;
+const PANEL_Y = 14;  // just below the HUD bar
 
 export class EncounterSystem {
   private scene: Phaser.Scene;
@@ -47,36 +48,37 @@ export class EncounterSystem {
   private active = false;
   private onChoice?: (action: EncounterAction, save: SaveData) => void;
   private save?: SaveData;
-  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.createUI();
-    this.cursors = scene.input.keyboard!.createCursorKeys();
   }
 
   private createUI() {
-    this.container = this.scene.add.container(0, 0).setDepth(110);
+    // setScrollFactor(0) keeps the container screen-fixed
+    this.container = this.scene.add.container(0, 0)
+      .setDepth(110).setScrollFactor(0);
 
     this.bg = this.scene.add.graphics();
     this.container.add(this.bg);
 
-    this.situationText = this.scene.add.text(BOX_X + 6, BOX_Y + 6, '', {
-      fontFamily: '"Press Start 2P", monospace',
-      fontSize: '4px',
+    this.situationText = this.scene.add.text(PANEL_X + 6, PANEL_Y + 6, '', {
+      fontFamily: 'Georgia, serif',
+      fontSize: '11px',
       color: '#d4b896',
-      wordWrap: { width: BOX_W - 12 },
-      lineSpacing: 3,
-      resolution: 4,
+      wordWrap: { width: PANEL_W - 12 },
+      lineSpacing: 2,
+      resolution: 3,
     });
     this.container.add(this.situationText);
 
-    this.descText = this.scene.add.text(BOX_X + 6, BOX_Y + 60, '', {
-      fontFamily: '"Press Start 2P", monospace',
-      fontSize: '4px',
+    this.descText = this.scene.add.text(PANEL_X + 6, PANEL_Y + 80, '', {
+      fontFamily: 'Georgia, serif',
+      fontSize: '10px',
+      fontStyle: 'italic',
       color: '#aaaaaa',
-      wordWrap: { width: BOX_W - 12 },
-      resolution: 4,
+      wordWrap: { width: PANEL_W - 12 },
+      resolution: 3,
     });
     this.container.add(this.descText);
 
@@ -84,14 +86,16 @@ export class EncounterSystem {
   }
 
   private drawBG(optionCount: number) {
-    const h = 30 + optionCount * 14 + 18;
+    const h = 38 + optionCount * 16 + 22;
     this.bg.clear();
-    this.bg.fillStyle(0x000000, 0.5);
-    this.bg.fillRect(BOX_X + 2, BOX_Y + 2, BOX_W, h);
-    this.bg.fillStyle(0x100c08, 0.95);
-    this.bg.fillRect(BOX_X, BOX_Y, BOX_W, h);
+    this.bg.fillStyle(0x000000, 0.55);
+    this.bg.fillRect(PANEL_X + 2, PANEL_Y + 2, PANEL_W, h);
+    this.bg.fillStyle(0x100c08, 0.96);
+    this.bg.fillRect(PANEL_X, PANEL_Y, PANEL_W, h);
     this.bg.lineStyle(1, 0xc9a84c, 1);
-    this.bg.strokeRect(BOX_X, BOX_Y, BOX_W, h);
+    this.bg.strokeRect(PANEL_X, PANEL_Y, PANEL_W, h);
+    this.bg.lineStyle(1, 0x7a5c2a, 0.4);
+    this.bg.strokeRect(PANEL_X + 2, PANEL_Y + 2, PANEL_W - 4, h - 4);
   }
 
   start(config: EncounterConfig, save: SaveData) {
@@ -112,22 +116,19 @@ export class EncounterSystem {
     this.optionTexts = [];
 
     this.options.forEach((opt, i) => {
-      const isSelected = i === this.selectedIndex;
-      const color = isSelected
-        ? Phaser.Display.Color.IntegerToColor(COLORS[opt.action]).rgba
-        : '#666666';
-      const prefix = isSelected ? '▶ ' : '  ';
-      const t = this.scene.add.text(BOX_X + 8, BOX_Y + 28 + i * 14, prefix + opt.label, {
+      const sel = i === this.selectedIndex;
+      const prefix = sel ? '> ' : '  ';
+      const t = this.scene.add.text(PANEL_X + 8, PANEL_Y + 36 + i * 16, prefix + opt.label, {
         fontFamily: '"Press Start 2P", monospace',
-        fontSize: '5px',
-        color,
-        resolution: 4,
+        fontSize: '6px',
+        color: sel ? COLORS[opt.action] : '#555555',
+        resolution: 3,
       });
       this.container.add(t);
       this.optionTexts.push(t);
     });
 
-    this.descText.setY(BOX_Y + 28 + this.options.length * 14 + 4);
+    this.descText.setY(PANEL_Y + 36 + this.options.length * 16 + 6);
     this.descText.setText(this.options[this.selectedIndex]?.description ?? '');
   }
 
@@ -137,7 +138,6 @@ export class EncounterSystem {
 
   handleInput(justDown: { up: boolean; down: boolean; space: boolean; enter: boolean }) {
     if (!this.active) return;
-
     if (justDown.up) {
       this.selectedIndex = (this.selectedIndex - 1 + this.options.length) % this.options.length;
       this.updateOptionTexts();
