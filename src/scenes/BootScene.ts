@@ -50,35 +50,19 @@ export class BootScene extends Phaser.Scene {
   }
 
   private generateSprites() {
-    // Player sprite (16x16, 4 directions × 3 frames = 12 frames)
     this.generatePlayerTexture();
-    // Crop named NPC textures from the kenney-chars spritesheet
-    // Sheet: 54 cols × 12 rows, 16px tiles, 1px spacing → frame = row*54 + col
-    this.cropNPCTexture('andrew',    0);    // col 0 row 0 — brown-robed villager
-    this.cropNPCTexture('peter',     54);   // col 0 row 1 — stocky fisherman
-    this.cropNPCTexture('jesus',     108);  // col 0 row 2 — robed figure (will tint gold)
-    this.cropNPCTexture('woman',     162);  // col 0 row 3 — female figure
-    this.cropNPCTexture('nicodemus', 216);  // col 0 row 4 — elder/scholar
-    // Tileset (kept for fallback)
+    // Each NPC gets distinct robes + hair — EarthBound-style pixel art
+    this.generateNPCTexture('andrew',    0x8b5e3c, 0x3a2010); // brown robe, dark hair
+    this.generateNPCTexture('peter',     0x3a6090, 0x6a3a10); // blue robe, auburn
+    this.generateNPCTexture('jesus',     0xf0ebe0, 0x5a3a18); // cream robe, light brown
+    this.generateNPCTexture('woman',     0x9b4a8a, 0x3a2010); // purple robe, dark hair
+    this.generateNPCTexture('nicodemus', 0x1a3a5c, 0x909090); // navy robe, gray hair
+    this.generateNPCTexture('judas',     0x4a6a30, 0x2a1a08); // green robe, black hair
+    this.generateNPCTexture('mary',      0x3a6a9a, 0x2a1a08); // blue robe
+    this.generateNPCTexture('child',     0xc8a850, 0x5a3a10); // yellow tunic, brown hair
+    this.generateNPCTexture('pharisee',  0x4a4a4a, 0x909090); // dark robes, gray
+    this.generateNPCTexture('villager',  0xa07840, 0x3a2010); // tan robe
     this.generateTileset();
-  }
-
-  private cropNPCTexture(key: string, frameIndex: number) {
-    // Copy a single frame from kenney-chars into a new 16×16 texture
-    const src = this.textures.get('kenney-chars');
-    if (!src || src.key === '__MISSING') {
-      // Fallback if kenney-chars failed to load
-      this.generateNPCTexture(key, 0x8b6914);
-      return;
-    }
-    const frame = src.get(frameIndex) as Phaser.Textures.Frame;
-    if (!frame) { this.generateNPCTexture(key, 0x8b6914); return; }
-
-    // Render the frame onto a new 16×16 texture using drawFrame
-    const rt = this.add.renderTexture(0, 0, 16, 16);
-    rt.drawFrame('kenney-chars', frameIndex, 0, 0);
-    rt.saveTexture(key);
-    rt.destroy();
   }
 
   private generatePlayerTexture() {
@@ -113,17 +97,73 @@ export class BootScene extends Phaser.Scene {
     this.splitAtlas('player', fw, fh, 12);
   }
 
-  private generateNPCTexture(key: string, bodyColor: number) {
-    const g = this.add.graphics();
-    g.fillStyle(bodyColor);      g.fillRect(4, 6, 8, 7);
-    g.fillStyle(0xd4b896);       g.fillRect(4, 1, 8, 6);
-    g.fillStyle(0x3a2010);       g.fillRect(5, 3, 2, 1); g.fillRect(9, 3, 2, 1);
-    g.fillStyle(bodyColor - 0x222222 < 0 ? 0 : bodyColor - 0x222222);
-    g.fillRect(5, 13, 3, 3); g.fillRect(8, 13, 3, 3);
+  private generateNPCTexture(key: string, bodyColor: number, hairColor: number) {
+    const g   = this.add.graphics();
+    const sk  = 0xd4a070;                                        // skin
+    const dk  = 0x2a1a08;                                        // dark detail
+    const sh  = Math.max(0, bodyColor - 0x222222);               // shadow robe
+    const ft  = 0x4a2a10;                                        // feet/sandals
+
+    // --- hair (row 0, full width) ---
+    g.fillStyle(hairColor);
+    g.fillRect(3, 0, 10, 2);
+
+    // --- head (rows 1-6) ---
+    g.fillStyle(sk);
+    g.fillRect(3, 1, 10, 6);
+
+    // --- eyes ---
+    g.fillStyle(dk);
+    g.fillRect(5, 3, 2, 1);
+    g.fillRect(9, 3, 2, 1);
+
+    // --- nose dot ---
+    g.fillStyle(0xb07840);
+    g.fillRect(7, 4, 2, 1);
+
+    // --- shoulders (slightly wider than body for silhouette) ---
+    g.fillStyle(bodyColor);
+    g.fillRect(2, 7, 12, 1);
+
+    // --- body/robe (rows 8-11) ---
+    g.fillRect(3, 8, 10, 4);
+
+    // --- belt / sash accent ---
+    g.fillStyle(sh);
+    g.fillRect(3, 10, 10, 1);
+
+    // --- lower robe / legs (rows 12-13) ---
+    g.fillStyle(bodyColor);
+    g.fillRect(4, 12, 3, 2);
+    g.fillRect(9, 12, 3, 2);
+
+    // --- sandals / feet (rows 14-15) ---
+    g.fillStyle(ft);
+    g.fillRect(4, 14, 3, 2);
+    g.fillRect(9, 14, 3, 2);
+
+    // --- Jesus: cream robe highlight + gold glow border ---
     if (key === 'jesus') {
-      g.lineStyle(1, 0xfff4cc, 0.7);
-      g.strokeRect(3, 0, 10, 16);
+      g.fillStyle(0xfff8f0);
+      g.fillRect(5, 8, 6, 3);          // robe highlight stripe
+      g.fillStyle(0xf0c840);
+      g.fillRect(3, 10, 10, 1);        // gold belt
+      g.lineStyle(1, 0xfff4cc, 0.85);
+      g.strokeRect(2, 0, 12, 16);      // glow outline
     }
+
+    // --- Nicodemus: scholar cap ---
+    if (key === 'nicodemus') {
+      g.fillStyle(0x1a1a3a);
+      g.fillRect(3, 0, 10, 2);         // dark cap over hair
+    }
+
+    // --- Pharisee: white stripe on dark robe ---
+    if (key === 'pharisee') {
+      g.fillStyle(0xffffff);
+      g.fillRect(3, 8, 2, 4);          // tzitzit stripe
+    }
+
     g.generateTexture(key, 16, 16);
     g.destroy();
   }

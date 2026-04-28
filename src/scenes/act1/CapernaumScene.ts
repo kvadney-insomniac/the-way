@@ -5,7 +5,7 @@ import { DialogueSystem } from '../../systems/DialogueSystem';
 import { EncounterSystem, EncounterAction } from '../../systems/EncounterSystem';
 import { applyEncounterChoice } from '../../systems/LOVESystem';
 import { loadSave, writeSave, unlockEpisode, completeEpisode } from '../../systems/SaveSystem';
-import { fadeIn } from '../../utils/pixelTransition';
+import { fadeIn, fadeToScene } from '../../utils/pixelTransition';
 import { globalAudio } from '../../systems/AudioSystem';
 import act1Data from '../../data/dialogue/act1.json';
 
@@ -27,6 +27,7 @@ export class CapernaumScene extends Phaser.Scene {
   private andrewEncounterDone = false;
   private peterTriggered = false;
   private scrollRoomQueued: string | null = null;
+  private transitioning = false;
 
   constructor() {
     super({ key: 'CapernaumScene' });
@@ -80,32 +81,48 @@ export class CapernaumScene extends Phaser.Scene {
   private buildMap() {
     const g = this.add.graphics();
 
-    // Sky gradient band (top strip)
-    g.fillGradientStyle(0x8fb8e0, 0x8fb8e0, 0xc9a870, 0xc9a870);
-    g.fillRect(0, 0, MAP_W, 30);
+    // Sky — warm Mediterranean morning
+    g.fillGradientStyle(0x7ec8f0, 0x7ec8f0, 0xe8c878, 0xe8c878);
+    g.fillRect(0, 0, MAP_W, 36);
 
-    // Ground (sandy)
-    g.fillStyle(0xc8a870);
-    g.fillRect(0, 30, MAP_W, MAP_H - 30);
-
-    // Dock area (water)
-    g.fillStyle(0x2a5fad);
-    g.fillRect(0, 160, MAP_W, MAP_H - 160);
-
-    // Dock planks
-    g.fillStyle(0x7a5530);
-    for (let x = 0; x < MAP_W; x += 20) {
-      g.fillRect(x, 158, 18, 8);
+    // Ground (bright sandy Galilean earth)
+    g.fillStyle(0xdcba7a);
+    g.fillRect(0, 36, MAP_W, MAP_H - 36);
+    // Subtle ground texture
+    g.fillStyle(0xc8a860);
+    for (let x = 0; x < MAP_W; x += 24) {
+      for (let y = 40; y < 158; y += 18) {
+        g.fillRect(x + (y % 24 === 0 ? 8 : 0), y, 6, 2);
+      }
     }
 
-    // Stone path down the center
-    g.fillStyle(0x9a8870);
-    g.fillRect(140, 30, 40, 130);
-    // Path texture marks
-    g.fillStyle(0x8a7860);
-    for (let y = 35; y < 155; y += 12) {
-      g.fillRect(142, y, 8, 4);
-      g.fillRect(158, y + 6, 7, 4);
+    // Dock area (water — bright Sea of Galilee blue)
+    g.fillStyle(0x3a78c8);
+    g.fillRect(0, 160, MAP_W, MAP_H - 160);
+    // Water shimmer
+    g.fillStyle(0x5a9ae0);
+    for (let x = 0; x < MAP_W; x += 18) {
+      g.fillRect(x, 165, 10, 2);
+      g.fillRect(x + 9, 172, 8, 2);
+    }
+
+    // Dock planks — warm wood
+    g.fillStyle(0x9a6a3a);
+    g.fillRect(0, 156, MAP_W, 10);
+    g.fillStyle(0x7a5028);
+    for (let x = 0; x < MAP_W; x += 20) {
+      g.fillRect(x, 157, 18, 1);
+      g.fillRect(x, 161, 18, 1);
+    }
+
+    // Stone path down the center — lighter limestone
+    g.fillStyle(0xb8a888);
+    g.fillRect(140, 36, 40, 124);
+    // Path cobblestone marks
+    g.fillStyle(0xa89878);
+    for (let y = 40; y < 155; y += 12) {
+      g.fillRect(142, y, 9, 5);
+      g.fillRect(158, y + 6, 8, 5);
     }
 
     // Houses (left side)
@@ -134,6 +151,29 @@ export class CapernaumScene extends Phaser.Scene {
     this.drawTree(g, 100, 40);
     this.drawTree(g, 280, 70);
     this.drawTree(g, 50, 130);
+
+    // Synagogue entrance (north center — arched stone doorway)
+    g.fillStyle(0x9a8870);
+    g.fillRect(136, 30, 48, 20);        // doorway lintel
+    g.fillStyle(0x1a120a);
+    g.fillRect(144, 36, 32, 14);        // dark door opening
+    g.fillStyle(0xc9a84c);
+    g.fillRect(144, 36, 32, 2);         // gold arch hint
+    // Synagogue label
+    this.add.text(160, 24, '▲ SYNAGOGUE', {
+      fontFamily: '"Press Start 2P", monospace',
+      fontSize: '5px', color: '#c9a84c', resolution: 3,
+    }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(10);
+
+    // Cana road sign (east edge)
+    g.fillStyle(0x7a5530);
+    g.fillRect(308, 88, 4, 20);          // signpost pole
+    g.fillStyle(0xd4b88a);
+    g.fillRect(292, 85, 24, 10);         // sign board
+    this.add.text(304, 90, '►\nCANA', {
+      fontFamily: '"Press Start 2P", monospace',
+      fontSize: '4px', color: '#3a2010', resolution: 3, align: 'center',
+    }).setOrigin(0.5).setDepth(10);
 
     // Ambient details: baskets, pottery
     g.fillStyle(0xa06030);
@@ -381,6 +421,20 @@ export class CapernaumScene extends Phaser.Scene {
     if (justZ || justSpace) {
       const nearby = this.npcs.find(n => n.canInteract);
       if (nearby) this.interactWith(nearby);
+    }
+
+    // Scene exits — only allow after Andrew has been met (tutorial gating)
+    if (!this.transitioning && this.andrewMet) {
+      // North exit → Synagogue (walk through the doorway)
+      if (this.player.y < 38 && this.player.x > 136 && this.player.x < 184) {
+        this.transitioning = true;
+        fadeToScene(this, 'SynagogueScene');
+      }
+      // East exit → Cana (walk off east edge)
+      if (this.player.x > 313 && this.player.y > 40 && this.player.y < 155) {
+        this.transitioning = true;
+        fadeToScene(this, 'CanaScene');
+      }
     }
   }
 
