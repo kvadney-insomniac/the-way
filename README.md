@@ -1,3 +1,13 @@
+# The Way (moved)
+
+This copy is no longer maintained. The game, its source and its issues now live at
+[VadneyK/the-way](https://github.com/VadneyK/the-way), and it plays at
+[vadneyk.github.io/the-way](https://vadneyk.github.io/the-way/).
+
+The page this repository serves redirects there. The rest of the code is kept as it was on 2026-09-08.
+
+---
+
 # The Way
 
 > *"I am the way and the truth and the life."* (John 14:6)
